@@ -200,7 +200,7 @@ class TestMainFailWell(unittest.TestCase):
             self.assertTrue("No list file given" in output)
 
     def testNoNewFiles(self):
-        test_input = ["-l", NO_NEW_LISTFILE]
+        test_input = ["-l", NO_NEW_LISTFILE, "-o", GOOD_SINGLE_OUTFILE]
         if logger.isEnabledFor(logging.DEBUG):
             main(test_input)
         with capture_stdout(main, test_input) as output:
