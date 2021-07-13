@@ -1,0 +1,16 @@
+test_data/col0_cut_01_Roi1.txt
+test_data/col0_cut_01_Roi2.txt
+test_data/col0_cut_01_Roi3.txt
+test_data/col0_cut_02_Roi1.txt
+test_data/col0_cut_02_Roi2.txt
+test_data/col0_cut_02_Roi3.txt
+test_data/col0_cut_02_Roi4.txt
+test_data/col0_cut_05_Roi1.txt
+test_data/col0_cut_05_Roi2.txt
+test_data/col0_cut_05_Roi3.txt
+test_data/col0_cut_06_Roi1.txt
+test_data/col0_cut_06_Roi2.txt
+test_data/col0_cut_06_Roi3.txt
+test_data/col0_cut_07_Roi1.txt
+test_data/col0_cut_07_Roi2.txt
+test_data/col0_cut_07_Roi3.txt

@@ -14,6 +14,7 @@ import errno
 import csv
 import sys
 import difflib
+import glob
 
 from lobe_polygon import main, warning, TOL
 from contextlib import contextmanager
@@ -169,12 +170,15 @@ APPEND_LISTFILE = os.path.join(DATA_DIR, "double_listfile.txt")
 APPEND_OUTFILE = os.path.join(DATA_DIR, "append_outfile.csv")
 EMPTY_OUTFILE = os.path.join(DATA_DIR, "empty_outfile.csv")
 EMPTY_FOR_COPYING = os.path.join(DATA_DIR, "empty.csv")
+FULL_LISTFILE = os.path.join(DATA_DIR, "full_listfile.txt")
+FULL_OUTFILE = os.path.join(DATA_DIR, "full_outfile.csv")
 
 GOOD_SINGLE_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
 GOOD_APPEND_OUTFILE = os.path.join(DATA_DIR, "good_append_outfile.csv")
-
+GOOD_FULL_OUTFILE = os.path.join(DATA_DIR, "good_full_outfile.csv")
 
 # Tests
+
 
 class TestMainFailWell(unittest.TestCase):
     def testHelp(self):
@@ -244,3 +248,15 @@ class TestMain(unittest.TestCase):
         finally:
             silent_remove(EMPTY_OUTFILE, disable=DISABLE_REMOVE)
             silent_remove(NEW_IMAGE_FILE, disable=DISABLE_REMOVE)
+
+    def testFullListfile(self):
+        test_input = ["-l", FULL_LISTFILE, "-o", FULL_OUTFILE]
+        try:
+            silent_remove(FULL_OUTFILE)
+            main(test_input)
+            # self.assertFalse((diff_lines(FULL_OUTFILE, GOOD_FULL_OUTFILE)))
+        finally:
+            silent_remove(FULL_OUTFILE, disable=DISABLE_REMOVE)
+            image_files = glob.glob("{}/*png".format(DATA_DIR))
+            for file in image_files:
+                silent_remove(file, disable=DISABLE_REMOVE)

@@ -17,6 +17,8 @@ import argparse
 import os
 import sys
 import pandas as pd
+from descartes.patch import PolygonPatch
+from scipy.signal import find_peaks
 
 # Error Codes
 # The good status code
@@ -98,7 +100,8 @@ def parse_cmdline(argv):
             else:
                 raise IOError("Could not find list file: {}".format(args.list))
         else:
-            raise InvalidDataError("No list file given. Specify list file as described in the help documentation ('-h').")
+            raise InvalidDataError("No list file given. "
+                                   "Specify list file as described in the help documentation ('-h').")
     except IOError as e:
         warning("Problems reading file:", e)
         parser.print_help()
@@ -137,15 +140,26 @@ def main(argv=None):
 
         # Generate a polygon object from cell coordinates
         cell = geo.Polygon(np.asarray(intable).astype(int))
+        hull = cell.convex_hull
+        # hull_patch = PolygonPatch(hull, alpha=0.5)
+        # ax.add_patch(hull_patch)
+        hull_distances = []
+        for point in cell.exterior.coords:
+            hull_distances.append(hull.exterior.distance(geo.Point(point)))
+        peak_indices, empty_dict = find_peaks(hull_distances, height=2)
+        if hull_distances[0] > hull_distances[1] and hull_distances[0] > hull_distances[-2]:
+            peak_indices = np.append([0], peak_indices)
         # Extract coordinates as iterable lists
         cell_x, cell_y = cell.exterior.xy
+        # plt.scatter(np.asarray(cell_x)[peak_indices], np.asarray(cell_y)[peak_indices])
 
         # Plot the cell border
         plt.plot(cell_x, cell_y, marker='+', color='black')
 
         if new_algorithm:
             # New core algorithm for determining "core" of the cell
-            print("Do something")
+            interior_x = list(np.asarray(cell_x)[peak_indices])
+            interior_y = list(np.asarray(cell_y)[peak_indices])
 
         else:
             # Old algorithm for determining the "core" of the cell
@@ -313,7 +327,10 @@ def main(argv=None):
                         if d > d_max:
                             d_max = d
                             ind = i
-                    neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
+                    try:
+                        neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
+                    except ZeroDivisionError:
+                        neck_slope = 10e6
                     # Prevent divide by zero if the neck is horizontal
                     try:
                         neck_antislope = -1 / neck_slope

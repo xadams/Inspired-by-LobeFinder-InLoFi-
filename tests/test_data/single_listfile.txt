@@ -1,1 +1,1 @@
-test_data/col0_cut_01_Roi1.txt
+test_data/col0_cut_06_Roi1.txt
