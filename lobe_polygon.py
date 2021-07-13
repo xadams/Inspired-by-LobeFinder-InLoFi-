@@ -24,7 +24,7 @@ GOOD_RET = 0
 INPUT_ERROR = 1
 IO_ERROR = 2
 INVALID_DATA = 3
-
+TOL = 0.0000000001
 COLUMN_NAMES = ["filename", "lobe height", "lobe width"]
 
 
@@ -92,9 +92,11 @@ def parse_cmdline(argv):
                         args.files.remove(file)
                         print("Removing file: {}, which is already in the output file.".format(file))
                     if not args.files:
-                        raise IOError("All files in listfile already in csv file.")
+                        raise IOError("All files in listfile unreadable or already in csv file.")
             else:
                 raise IOError("Could not find list file: {}".format(args.list))
+        else:
+            raise InvalidDataError("No list file given. Specify list file as described in the help documentation ('-h').")
     except IOError as e:
         warning("Problems reading file:", e)
         parser.print_help()
