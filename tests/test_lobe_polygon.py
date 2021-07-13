@@ -16,8 +16,8 @@ import sys
 import difflib
 
 from lobe_polygon import main, warning, TOL
-from md_utils.md_common import  capture_stderr, capture_stdout, silent_remove
 from contextlib import contextmanager
+
 
 # noinspection PyTypeChecker
 def diff_lines(floc1, floc2, delimiter=","):
@@ -46,9 +46,9 @@ def diff_lines(floc1, floc2, delimiter=","):
         if line.startswith('-') or line.startswith('+'):
             diff_lines_list.append(line)
             if line.startswith('-'):
-                output_neg += line[2:]+'\n'
+                output_neg += line[2:] + '\n'
             elif line.startswith('+'):
-                output_plus += line[2:]+'\n'
+                output_plus += line[2:] + '\n'
 
     if len(diff_lines_list) == 0:
         return diff_lines_list
@@ -110,6 +110,7 @@ def diff_lines(floc1, floc2, delimiter=","):
                 diff_lines_list.append("+ " + " ".join(map(str, line_plus)))
     return diff_lines_list
 
+
 @contextmanager
 def capture_stdout(command, *args, **kwargs):
     # pycharm doesn't know six very well, so ignore the false warning
@@ -120,6 +121,7 @@ def capture_stdout(command, *args, **kwargs):
     yield sys.stdout.read()
     sys.stdout = out
 
+
 @contextmanager
 def capture_stderr(command, *args, **kwargs):
     # pycharm doesn't know six very well, so ignore the false warning
@@ -129,6 +131,7 @@ def capture_stderr(command, *args, **kwargs):
     sys.stderr.seek(0)
     yield sys.stderr.read()
     sys.stderr = err
+
 
 def silent_remove(filename, disable=False):
     """
@@ -144,6 +147,7 @@ def silent_remove(filename, disable=False):
         except OSError as e:
             if e.errno != errno.ENOENT:
                 raise
+
 
 __author__ = 'xadams'
 
@@ -165,6 +169,7 @@ APPEND_OUTFILE = os.path.join(DATA_DIR, "append_outfile.csv")
 
 GOOD_SINGLE_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
 GOOD_APPEND_OUTFILE = os.path.join(DATA_DIR, "good_append_outfile.csv")
+
 
 # Tests
 
@@ -200,6 +205,7 @@ class TestMainFailWell(unittest.TestCase):
             self.assertTrue("already in the output" in output)
         with capture_stderr(main, test_input) as output:
             self.assertTrue("listfile unreadable or already" in output)
+
 
 class TestMain(unittest.TestCase):
     def testNewOutputFile(self):
