@@ -2,7 +2,7 @@
 # 1. Constructs the lobes
 # 2. Eliminates lobes below a threshold
 # 3. Outputs desired metrics including:
-# a. Number of lobes
+# a. Number of lobes (indirectly)
 # b. Width of lobes
 # c. Height of lobes
 # Current Problems:
@@ -63,24 +63,26 @@ def parse_cmdline(argv):
     # initialize the parser object:
     parser = argparse.ArgumentParser(
         description='Process ROI coordinate files and output quantification and images.')
-    # parser.add_argument('files', metavar='files', type=str, nargs='+')
     parser.add_argument("-l", "--list", help="File with list of trajectory files")
     parser.add_argument("-o", "--out_file", help="File to write output to. Default is lobe_quantities.csv.",
                         type=str, default='lobe_quantities.csv')
 
     args = None
+    # Try to parse command line arguments
     try:
         args = parser.parse_args(argv)
         args.files = []
+        # If output file already exists, check existing files against input list
         if os.path.isfile(args.out_file):
             out_frame = pd.read_csv(args.out_file)
             logged_files = list(out_frame["filename"].unique())
+        # Otherwise, generate output file with specified name
         else:
             print("Did not find {}, writing new file.".format(args.out_file))
             logged_files = []
-
             df = pd.DataFrame(columns=COLUMN_NAMES)
             df.to_csv(args.out_file)
+        # For each file in listfile, check that it exists and has not already been processed
         if args.list:
             if os.path.isfile(args.list):
                 args.files += file_rows_to_list(args.list)
@@ -123,7 +125,7 @@ def main(argv=None):
         return ret
     cellfiles = args.files
 
-    # Iterate through cell files, placing each on a different axis
+    # Iterate through cell files, placing each on a different plot
     df = pd.read_csv(args.out_file)
     for cellfile in cellfiles:
         fig, ax = plt.subplots()
@@ -185,7 +187,6 @@ def main(argv=None):
         # Duplicate the first point to plot a closed cell
         interior_x.append(interior_x[0])
         interior_y.append(interior_y[0])
-        # plt.plot(interior_x,interior_y,color='magenta')
         plt.title(cellfile)
 
         # This loop forms the individual lobes based on the necks from the previous step
@@ -305,7 +306,6 @@ def main(argv=None):
                         if d > d_max:
                             d_max = d
                             ind = i
-                    # print("height = {}".format(d_max))
                     neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
                     # Prevent divide by zero if the neck is horizontal
                     try:
@@ -320,7 +320,6 @@ def main(argv=None):
                     # Calculate the diameter of the inscribed circle
                     inscribed_circle = polylabel(lobe, tolerance=0.1)
                     d = lobe.exterior.distance(inscribed_circle)
-                    # print("width = {}".format(d))
                     circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d)
                     ax.add_patch(circle)
                     plt.text(inscribed_circle.x, inscribed_circle.y, j)
@@ -332,8 +331,6 @@ def main(argv=None):
         plt.savefig(image_name)
         fig.clear()
         plt.close()
-    # plt.show()
-    # print(df)
     df.drop(df.columns[0], axis=1, inplace=True)
     df.to_csv(args.out_file)
 

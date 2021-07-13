@@ -166,6 +166,8 @@ NEW_IMAGE_FILE = os.path.join(DATA_DIR, "col0_cut_01_Roi1.png")
 IMAGE_FILE2 = os.path.join(DATA_DIR, "col0_cut_01_Roi2.png")
 APPEND_LISTFILE = os.path.join(DATA_DIR, "double_listfile.txt")
 APPEND_OUTFILE = os.path.join(DATA_DIR, "append_outfile.csv")
+EMPTY_OUTFILE = os.path.join(DATA_DIR, "empty_outfile.csv")
+EMPTY_FOR_COPYING = os.path.join(DATA_DIR, "empty.csv")
 
 GOOD_SINGLE_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
 GOOD_APPEND_OUTFILE = os.path.join(DATA_DIR, "good_append_outfile.csv")
@@ -227,3 +229,13 @@ class TestMain(unittest.TestCase):
         finally:
             silent_remove(APPEND_OUTFILE, disable=DISABLE_REMOVE)
             silent_remove(IMAGE_FILE2, disable=DISABLE_REMOVE)
+
+    def testEmptyOutfile(self):
+        test_input = ["-l", NO_NEW_LISTFILE, "-o", EMPTY_OUTFILE]
+        try:
+            shutil.copyfile(EMPTY_FOR_COPYING, EMPTY_OUTFILE)
+            main(test_input)
+            self.assertFalse((diff_lines(EMPTY_OUTFILE, GOOD_SINGLE_OUTFILE)))
+        finally:
+            silent_remove(EMPTY_OUTFILE, disable=DISABLE_REMOVE)
+            silent_remove(NEW_IMAGE_FILE, disable=DISABLE_REMOVE)
