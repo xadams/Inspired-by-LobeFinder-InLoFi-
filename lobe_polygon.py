@@ -115,6 +115,7 @@ def parse_cmdline(argv):
 def main(argv=None):
     # Options
     make_lobes = True  # Generate polygons for individual lobes and remove small lobes
+    new_algorithm = False
     quantify_lobes = True  # Determine and output lobe count, height, and width
     lobe_area_cutoff = 30
     end_connectivity_cutoff = 0.5
@@ -142,47 +143,53 @@ def main(argv=None):
         # Plot the cell border
         plt.plot(cell_x, cell_y, marker='+', color='black')
 
-        interior_x = []
-        interior_y = []
-        i = 0
-        j = 2
-        prev_line_length = 0
-        # This boolean tracks if the furthest point has been passed
-        past_max = False
-        number_outside = 0
-        while i+j < len(cell_x):
-            a = geo.LineString([(cell_x[i], cell_y[i]), (cell_x[i + j], cell_y[i + j])])
-            # If a local maximum has been reached, check if this point is a local minimum
-            if a.length > prev_line_length + 5 and past_max:
-                interior_x.append(cell_x[i + j - 1])
-                interior_y.append(cell_y[i + j - 1])
-                i = i + j - 1
-                j = 2
-                past_max = False
-                prev_line_length = 0
-                number_outside = 0
-            # If the connecting line is completely within the cell, move to the next point
-            elif a.within(cell):
-                j += 1
-                if a.length < prev_line_length:
-                    past_max = True
-                prev_line_length = a.length
-            # Forgive the first point that falls outside the cell, but remember the point to come back to
-            elif number_outside == 1:
-                interior_x.append(cell_x[i + j - 2])
-                interior_y.append(cell_y[i + j - 2])
-                i = i + j - 2
-                j = 2
-                past_max = False
-                prev_line_length = 0
-                number_outside = 0
-            # Otherwise, write the point because the next line falls outside the cell
-            else:
-                number_outside += 1
-                j += 1
-                if a.length < prev_line_length:
-                    past_max = True
-                prev_line_length = a.length
+        if new_algorithm:
+            # New core algorithm for determining "core" of the cell
+            print("Do something")
+
+        else:
+            # Old algorithm for determining the "core" of the cell
+            interior_x = []
+            interior_y = []
+            i = 0
+            j = 2
+            prev_line_length = 0
+            # This boolean tracks if the furthest point has been passed
+            past_max = False
+            number_outside = 0
+            while i+j < len(cell_x):
+                a = geo.LineString([(cell_x[i], cell_y[i]), (cell_x[i + j], cell_y[i + j])])
+                # If a local maximum has been reached, check if this point is a local minimum
+                if a.length > prev_line_length + 5 and past_max:
+                    interior_x.append(cell_x[i + j - 1])
+                    interior_y.append(cell_y[i + j - 1])
+                    i = i + j - 1
+                    j = 2
+                    past_max = False
+                    prev_line_length = 0
+                    number_outside = 0
+                # If the connecting line is completely within the cell, move to the next point
+                elif a.within(cell):
+                    j += 1
+                    if a.length < prev_line_length:
+                        past_max = True
+                    prev_line_length = a.length
+                # Forgive the first point that falls outside the cell, but remember the point to come back to
+                elif number_outside == 1:
+                    interior_x.append(cell_x[i + j - 2])
+                    interior_y.append(cell_y[i + j - 2])
+                    i = i + j - 2
+                    j = 2
+                    past_max = False
+                    prev_line_length = 0
+                    number_outside = 0
+                # Otherwise, write the point because the next line falls outside the cell
+                else:
+                    number_outside += 1
+                    j += 1
+                    if a.length < prev_line_length:
+                        past_max = True
+                    prev_line_length = a.length
 
         # Duplicate the first point to plot a closed cell
         interior_x.append(interior_x[0])

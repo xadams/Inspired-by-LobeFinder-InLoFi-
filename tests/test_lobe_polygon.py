@@ -159,6 +159,7 @@ DISABLE_REMOVE = logger.isEnabledFor(logging.DEBUG)
 # File Locations #
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'test_data')
+FAIL_WELL_OUTPUT = os.path.join(os.path.dirname(__file__), 'lobe_quantities.csv')
 NO_NEW_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
 NO_NEW_LISTFILE = os.path.join(DATA_DIR, "single_listfile.txt")
 NEW_OUTFILE = os.path.join(DATA_DIR, "outfile.csv")
@@ -184,6 +185,7 @@ class TestMainFailWell(unittest.TestCase):
             self.assertFalse(output)
         with capture_stdout(main, test_input) as output:
             self.assertTrue("optional arguments" in output)
+        silent_remove(FAIL_WELL_OUTPUT)
 
     def testNoSuchFile(self):
         test_input = ["-l", "ghost"]
@@ -191,6 +193,7 @@ class TestMainFailWell(unittest.TestCase):
             main(test_input)
         with capture_stderr(main, test_input) as output:
             self.assertTrue("Could not find list" in output)
+        silent_remove(FAIL_WELL_OUTPUT)
 
     def testNoSpecifiedFile(self):
         test_input = []
@@ -198,6 +201,7 @@ class TestMainFailWell(unittest.TestCase):
             main(test_input)
         with capture_stderr(main, test_input) as output:
             self.assertTrue("No list file given" in output)
+        silent_remove(FAIL_WELL_OUTPUT)
 
     def testNoNewFiles(self):
         test_input = ["-l", NO_NEW_LISTFILE, "-o", GOOD_SINGLE_OUTFILE]
@@ -207,6 +211,7 @@ class TestMainFailWell(unittest.TestCase):
             self.assertTrue("already in the output" in output)
         with capture_stderr(main, test_input) as output:
             self.assertTrue("listfile unreadable or already" in output)
+        silent_remove(FAIL_WELL_OUTPUT)
 
 
 class TestMain(unittest.TestCase):
