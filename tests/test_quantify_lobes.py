@@ -16,7 +16,7 @@ import sys
 import difflib
 import glob
 
-from lobe_polygon import main, warning, TOL
+from quantify_lobes import main, warning, TOL
 from contextlib import contextmanager
 
 
