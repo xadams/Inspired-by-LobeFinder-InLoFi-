@@ -118,10 +118,12 @@ def parse_cmdline(argv):
 def main(argv=None):
     # Options
     make_lobes = True  # Generate polygons for individual lobes and remove small lobes
-    new_algorithm = False
+    new_algorithm = True
     quantify_lobes = True  # Determine and output lobe count, height, and width
+    plot_heights = False
     lobe_area_cutoff = 30
-    end_connectivity_cutoff = 0.5
+    end_connectivity_cutoff = 0.5  # Fraction of points that the 'end' needs to 'see'
+    lobe_angle_change = 30  # Minimum angle between necks for a new lobe
     # Read input
     args, ret = parse_cmdline(argv)
 
@@ -269,9 +271,11 @@ def main(argv=None):
             all_lobes_y.append(lobes_y)
 
             lobes = []
+            combine_lobes_index = []
             #  Create a polygon object for each lobe and measure the area
             for lobe_x, lobe_y in zip(all_lobes_x, all_lobes_y):
                 coords = [[x, y] for x, y in zip(lobe_x, lobe_y)]
+                # Iterate through lobe looking for a point that can 'see' 50% of points
                 for i, (x, y) in enumerate(coords):
                     point = geo.Point(x, y)
                     num_in_cell = 0
@@ -311,14 +315,28 @@ def main(argv=None):
                             x.append(x[0])
                             y.append(y[0])
                             plt.plot(x, y)
+                            try:
+                                neck_slope = (y[-3] - y[0]) / (x[-3] - x[0])
+                            except ZeroDivisionError:
+                                neck_slope = 10e6
+                            if 'prev_neck_slope' in locals():
+                                lobe_neck_angle = np.arctan((neck_slope - prev_neck_slope) / (1 + neck_slope * prev_neck_slope))
+                                combine_lobes_index.append(lobe_neck_angle*180/np.pi)
+                                # if lobe_neck_angle < lobe_angle_change:
+                                #     combine_lobes_index.append(1)
+                                # else:
+                                #     combine_lobes_index.append(2)
+                            prev_neck_slope = neck_slope
                 except ValueError:
                     print("Eliminating lobe with too few members.")
 
+            # print(combine_lobes_index)
             if quantify_lobes:
                 # Calculate and plot the height of each lobe
                 for j, lobe in enumerate(lobes):
                     lobe_x, lobe_y = lobe.exterior.xy
                     d_max = 0
+                    # Calculate the distance of each point from the neck to determine lobe height
                     for i, (x, y) in enumerate(zip(lobe_x[1:-2], lobe_y[1:-2]), 1):
                         p1 = np.asarray([lobe_x[0], lobe_y[0]])
                         p2 = np.asarray([lobe_x[-2], lobe_y[-2]])
@@ -327,19 +345,21 @@ def main(argv=None):
                         if d > d_max:
                             d_max = d
                             ind = i
-                    try:
-                        neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
-                    except ZeroDivisionError:
-                        neck_slope = 10e6
-                    # Prevent divide by zero if the neck is horizontal
-                    try:
-                        neck_antislope = -1 / neck_slope
-                    except ZeroDivisionError:
-                        neck_antislope = 10e6
-                    x_intercept = (lobe_y[-2] - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * lobe_x[-2])\
-                        / (neck_antislope - neck_slope)
-                    y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
-                    plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept])
+                    # Replace vertical slopes with sufficiently large value for plotting
+                    if plot_heights:
+                        try:
+                            neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
+                        except ZeroDivisionError:
+                            neck_slope = 10e6
+                        # Prevent divide by zero if the neck is horizontal
+                        try:
+                            neck_antislope = -1 / neck_slope
+                        except ZeroDivisionError:
+                            neck_antislope = 10e6
+                        x_intercept = (lobe_y[-2] - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * lobe_x[-2])\
+                            / (neck_antislope - neck_slope)
+                        y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
+                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept])
 
                     # Calculate the diameter of the inscribed circle
                     inscribed_circle = polylabel(lobe, tolerance=0.1)
