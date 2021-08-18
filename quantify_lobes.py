@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
+import math
 import pandas as pd
 from descartes.patch import PolygonPatch
 from scipy.signal import find_peaks
@@ -27,7 +28,7 @@ INPUT_ERROR = 1
 IO_ERROR = 2
 INVALID_DATA = 3
 TOL = 0.0000000001
-COLUMN_NAMES = ["filename", "lobe height", "lobe width"]
+COLUMN_NAMES = ["filename", "lobe height", "lobe width", "neck width"]
 
 
 class MdError(Exception):
@@ -121,7 +122,7 @@ def main(argv=None):
     new_algorithm = True
     quantify_lobes = True  # Determine and output lobe count, height, and width
     plot_heights = False
-    lobe_area_cutoff = 30
+    lobe_perimeter_cutoff = 0.5
     end_connectivity_cutoff = 0.5  # Fraction of points that the 'end' needs to 'see'
     lobe_angle_change = 30  # Minimum angle between necks for a new lobe
     # Read input
@@ -308,7 +309,7 @@ def main(argv=None):
                 try:
                     p = geo.Polygon(coords)
                     # Cutoff value for small lobes
-                    if p.area > lobe_area_cutoff:
+                    if p.length > lobe_perimeter_cutoff:
                         if p.exterior.within(cell):
                             lobes.append(p)
                             x, y = p.exterior.xy
@@ -338,17 +339,22 @@ def main(argv=None):
                     d_max = 0
                     # Calculate the distance of each point from the neck to determine lobe height
                     for i, (x, y) in enumerate(zip(lobe_x[1:-2], lobe_y[1:-2]), 1):
-                        p1 = np.asarray([lobe_x[0], lobe_y[0]])
-                        p2 = np.asarray([lobe_x[-2], lobe_y[-2]])
+                        x1 = lobe_x[0]
+                        x2 = lobe_x[-2]
+                        y1 = lobe_y[0]
+                        y2 = lobe_y[-2]
+                        p1 = np.asarray([x1, y1])
+                        p2 = np.asarray([x2, y2])
                         p3 = np.asarray([x, y])
                         d = np.abs(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
+                        neck_length = math.hypot(x2 - x1, y2 - y1)
                         if d > d_max:
                             d_max = d
                             ind = i
                     # Replace vertical slopes with sufficiently large value for plotting
                     if plot_heights:
                         try:
-                            neck_slope = (lobe_y[-2] - lobe_y[0]) / (lobe_x[-2] - lobe_x[0])
+                            neck_slope = (y2 - y1) / (y2 - y1)
                         except ZeroDivisionError:
                             neck_slope = 10e6
                         # Prevent divide by zero if the neck is horizontal
@@ -356,7 +362,7 @@ def main(argv=None):
                             neck_antislope = -1 / neck_slope
                         except ZeroDivisionError:
                             neck_antislope = 10e6
-                        x_intercept = (lobe_y[-2] - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * lobe_x[-2])\
+                        x_intercept = (y2 - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * x1)\
                             / (neck_antislope - neck_slope)
                         y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
                         plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept])
@@ -368,7 +374,7 @@ def main(argv=None):
                     ax.add_patch(circle)
                     plt.text(inscribed_circle.x, inscribed_circle.y, j)
 
-                    lobe_frame = pd.DataFrame([[cellfile, d_max, d]], columns=COLUMN_NAMES)
+                    lobe_frame = pd.DataFrame([[cellfile, d_max, d, neck_length]], columns=COLUMN_NAMES)
                     df = df.append(lobe_frame, ignore_index=True, sort=True)
 
         image_name = "{}.png".format(os.path.splitext(cellfile)[0])

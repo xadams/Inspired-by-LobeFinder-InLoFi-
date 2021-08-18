@@ -5,7 +5,7 @@ This script quantifies lobes of dicot leaves, inspired by this [paper](https://a
 The script is used in the following way:
 
 ```python
-python quantify_lobes -l listfile -o outputfile
+python quantify_lobes.py -l listfile -o outputfile
 ```
 
 Additional information can be provided with the help tag:
