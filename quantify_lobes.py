@@ -371,12 +371,16 @@ def main(argv=None):
                         plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept])
 
                     # Calculate the diameter of the inscribed circle
-                    inscribed_circle = polylabel(lobe, tolerance=0.1)
-                    d = lobe.exterior.distance(inscribed_circle)
-                    circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d)
-                    ax.add_patch(circle)
-                    plt.text(inscribed_circle.x, inscribed_circle.y, j)
-
+                    try:
+                        inscribed_circle = polylabel(lobe, tolerance=0.1)
+                        d = lobe.exterior.distance(inscribed_circle)
+                        circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d)
+                        ax.add_patch(circle)
+                        plt.text(inscribed_circle.x, inscribed_circle.y, j)
+                    # TODO: change to specfic error type
+                    except:
+                        print("Polylabel error. Take a closer look at {}".format(cellfile))
+                        d = 0
                     lobe_frame = pd.DataFrame([[cellfile, d_max, d, neck_length]], columns=COLUMN_NAMES)
                     df = df.append(lobe_frame, ignore_index=True, sort=True)
 
