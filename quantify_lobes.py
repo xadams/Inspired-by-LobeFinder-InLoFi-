@@ -28,7 +28,7 @@ INPUT_ERROR = 1
 IO_ERROR = 2
 INVALID_DATA = 3
 TOL = 0.0000000001
-COLUMN_NAMES = ["filename", "lobe height", "lobe width", "neck width"]
+COLUMN_NAMES = ["filename", "lobe height", "lobe width", "neck width", "cell area", "lobe area", "area ratio"]
 
 
 class MdError(Exception):
@@ -143,6 +143,8 @@ def main(argv=None):
 
         # Generate a polygon object from cell coordinates
         cell = geo.Polygon(np.asarray(intable).astype(int))
+        cell_area = cell.area
+        lobe_area = 0
         hull = cell.convex_hull
         # hull_patch = PolygonPatch(hull, alpha=0.5)
         # ax.add_patch(hull_patch)
@@ -312,6 +314,7 @@ def main(argv=None):
                     if p.length > lobe_perimeter_cutoff:
                         if p.exterior.within(cell):
                             lobes.append(p)
+                            lobe_area += p.area
                             x, y = p.exterior.xy
                             x.append(x[0])
                             y.append(y[0])
@@ -381,8 +384,9 @@ def main(argv=None):
                     except:
                         print("Polylabel error. Take a closer look at {}".format(cellfile))
                         d = 0
-                    lobe_frame = pd.DataFrame([[cellfile, d_max, d, neck_length]], columns=COLUMN_NAMES)
-                    df = df.append(lobe_frame, ignore_index=True, sort=True)
+                    ratio = lobe_area/cell_area
+                    lobe_frame = pd.DataFrame([[cellfile, d_max, d, neck_length, cell_area, lobe_area, ratio]], columns=COLUMN_NAMES)
+                    df = df.append(lobe_frame, ignore_index=True, sort=False)
 
         image_name = "{}.png".format(os.path.splitext(cellfile)[0])
         plt.savefig(image_name)
