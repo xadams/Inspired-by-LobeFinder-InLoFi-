@@ -338,6 +338,7 @@ def main(argv=None):
                     print("Eliminating lobe with too few members.")
 
             # print(combine_lobes_index)
+            ratio = lobe_area / cell_area
             if quantify_lobes:
                 # Calculate and plot the height of each lobe
                 for j, lobe in enumerate(lobes):
@@ -384,8 +385,11 @@ def main(argv=None):
                     except:
                         print("Polylabel error. Take a closer look at {}".format(cellfile))
                         d = 0
-                    ratio = lobe_area/cell_area
+
                     lobe_frame = pd.DataFrame([[cellfile, d_max, d, neck_length, cell_area, lobe_area, ratio]], columns=COLUMN_NAMES)
+                    cell_area = ""
+                    lobe_area = ""
+                    ratio = ""
                     df = df.append(lobe_frame, ignore_index=True, sort=False)
 
         image_name = "{}.png".format(os.path.splitext(cellfile)[0])
