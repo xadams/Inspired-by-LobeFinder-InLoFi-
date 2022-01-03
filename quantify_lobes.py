@@ -316,9 +316,8 @@ def main(argv=None):
                             lobes.append(p)
                             lobe_area += p.area
                             x, y = p.exterior.xy
-                            x.append(x[0])
-                            y.append(y[0])
-                            plt.plot(x, y)
+                            # plt.plot(x, y) # Plot each lobe
+                            plt.plot(x[-2:], y[-2:])  # Plot only neck
                             try:
                                 neck_slope = (y[-3] - y[0]) / (x[-3] - x[0])
                             except ZeroDivisionError:
