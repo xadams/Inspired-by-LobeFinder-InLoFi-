@@ -121,7 +121,7 @@ def main(argv=None):
     make_lobes = True  # Generate polygons for individual lobes and remove small lobes
     new_algorithm = True
     quantify_lobes = True  # Determine and output lobe count, height, and width
-    plot_heights = False
+    plot_heights = True
     lobe_perimeter_cutoff = 0.5
     end_connectivity_cutoff = 0.5  # Fraction of points that the 'end' needs to 'see'
     lobe_angle_change = 30  # Minimum angle between necks for a new lobe
@@ -317,7 +317,7 @@ def main(argv=None):
                             lobe_area += p.area
                             x, y = p.exterior.xy
                             # plt.plot(x, y) # Plot each lobe
-                            plt.plot(x[-2:], y[-2:])  # Plot only neck
+                            plt.plot(x[-2:], y[-2:], c='magenta')  # Plot only neck
                             try:
                                 neck_slope = (y[-3] - y[0]) / (x[-3] - x[0])
                             except ZeroDivisionError:
@@ -360,7 +360,7 @@ def main(argv=None):
                     # Replace vertical slopes with sufficiently large value for plotting
                     if plot_heights:
                         try:
-                            neck_slope = (y2 - y1) / (y2 - y1)
+                            neck_slope = (y2 - y1) / (x2 - x1)
                         except ZeroDivisionError:
                             neck_slope = 10e6
                         # Prevent divide by zero if the neck is horizontal
@@ -368,16 +368,17 @@ def main(argv=None):
                             neck_antislope = -1 / neck_slope
                         except ZeroDivisionError:
                             neck_antislope = 10e6
-                        x_intercept = (y2 - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * x1)\
+                        x_intercept = (y2 - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * x2)\
                             / (neck_antislope - neck_slope)
                         y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
-                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept])
+                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept],c='cyan')
 
                     # Calculate the diameter of the inscribed circle
                     try:
                         inscribed_circle = polylabel(lobe, tolerance=0.1)
                         d = lobe.exterior.distance(inscribed_circle)
-                        circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d)
+                        circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d,
+                                            facecolor='white', edgecolor='lawngreen', lw=2)
                         ax.add_patch(circle)
                         plt.text(inscribed_circle.x, inscribed_circle.y, j)
                     # TODO: change to specfic error type
