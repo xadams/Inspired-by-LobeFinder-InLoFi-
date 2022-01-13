@@ -317,7 +317,7 @@ def main(argv=None):
                             lobe_area += p.area
                             x, y = p.exterior.xy
                             # plt.plot(x, y) # Plot each lobe
-                            plt.plot(x[-2:], y[-2:], c='magenta')  # Plot only neck
+                            plt.plot(x[-2:], y[-2:], c='#a36c22')  # Plot only neck
                             try:
                                 neck_slope = (y[-3] - y[0]) / (x[-3] - x[0])
                             except ZeroDivisionError:
@@ -371,14 +371,14 @@ def main(argv=None):
                         x_intercept = (y2 - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * x2)\
                             / (neck_antislope - neck_slope)
                         y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
-                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept],c='cyan')
+                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept],c='#93b0d0')
 
                     # Calculate the diameter of the inscribed circle
                     try:
                         inscribed_circle = polylabel(lobe, tolerance=0.1)
                         d = lobe.exterior.distance(inscribed_circle)
                         circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d,
-                                            facecolor='white', edgecolor='lawngreen', lw=2)
+                                            facecolor='white', edgecolor='#6f2205', lw=2)
                         ax.add_patch(circle)
                         plt.text(inscribed_circle.x, inscribed_circle.y, j)
                     # TODO: change to specfic error type
