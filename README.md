@@ -1,4 +1,4 @@
-This script quantifies lobes of dicot leaves, inspired by this [paper](https://academic.oup.com/plphys/article/171/4/2331/6115282).
+This script quantifies lobes of dicot leaves, inspired by this [paper](https://academic.oup.com/plphys/article/171/4/2331/6115282) with some key differences.
 
 ## Usage
 
