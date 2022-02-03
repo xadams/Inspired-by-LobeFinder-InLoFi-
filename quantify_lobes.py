@@ -159,7 +159,7 @@ def main(argv=None):
         # plt.scatter(np.asarray(cell_x)[peak_indices], np.asarray(cell_y)[peak_indices])
 
         # Plot the cell border
-        plt.plot(cell_x, cell_y, marker='+', color='black')
+        plt.plot(cell_x, cell_y, color='black', label='cell wall')
 
         if new_algorithm:
             # New core algorithm for determining "core" of the cell
@@ -275,6 +275,7 @@ def main(argv=None):
 
             lobes = []
             combine_lobes_index = []
+            legend = True
             #  Create a polygon object for each lobe and measure the area
             for lobe_x, lobe_y in zip(all_lobes_x, all_lobes_y):
                 coords = [[x, y] for x, y in zip(lobe_x, lobe_y)]
@@ -317,7 +318,10 @@ def main(argv=None):
                             lobe_area += p.area
                             x, y = p.exterior.xy
                             # plt.plot(x, y) # Plot each lobe
-                            plt.plot(x[-2:], y[-2:], c='#a36c22')  # Plot only neck
+                            if legend:
+                                plt.plot(x[-2:], y[-2:], color='#ED553B', label='Neck width')  # Plot only neck
+                            else:
+                                plt.plot(x[-2:], y[-2:], color='#ED553B')
                             try:
                                 neck_slope = (y[-3] - y[0]) / (x[-3] - x[0])
                             except ZeroDivisionError:
@@ -333,10 +337,12 @@ def main(argv=None):
                                 # else:
                                 #     combine_lobes_index.append(2)
                             prev_neck_slope = neck_slope
+                            legend = False
                 except ValueError:
                     print("Eliminating lobe with too few members.")
 
             # print(combine_lobes_index)
+            legend = True
             ratio = lobe_area / cell_area
             if quantify_lobes:
                 # Calculate and plot the height of each lobe
@@ -371,14 +377,21 @@ def main(argv=None):
                         x_intercept = (y2 - lobe_y[ind] + neck_antislope * lobe_x[ind] - neck_slope * x2)\
                             / (neck_antislope - neck_slope)
                         y_intercept = neck_antislope * (x_intercept - lobe_x[ind]) + lobe_y[ind]
-                        plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept],c='#93b0d0')
+                        if legend:
+                            plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept],color='#3CAEA3', label='Lobe height')
+                        else:
+                            plt.plot([lobe_x[ind], x_intercept], [lobe_y[ind], y_intercept], color='#3CAEA3')
 
                     # Calculate the diameter of the inscribed circle
                     try:
                         inscribed_circle = polylabel(lobe, tolerance=0.1)
                         d = lobe.exterior.distance(inscribed_circle)
-                        circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d,
-                                            facecolor='white', edgecolor='#6f2205', lw=2)
+                        if legend:
+                            circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d,
+                                            facecolor='white', edgecolor='#20639B', lw=2, label='Lobe width')
+                        else:
+                            circle = plt.Circle([inscribed_circle.x, inscribed_circle.y], d,
+                                                facecolor='white', edgecolor='#20639B', lw=2)
                         ax.add_patch(circle)
                         plt.text(inscribed_circle.x, inscribed_circle.y, j)
                     # TODO: change to specfic error type
@@ -391,8 +404,10 @@ def main(argv=None):
                     lobe_area = ""
                     ratio = ""
                     df = df.append(lobe_frame, ignore_index=True, sort=False)
+                    legend = False
 
         image_name = "{}.png".format(os.path.splitext(cellfile)[0])
+        plt.legend(loc='best')
         plt.savefig(image_name)
         fig.clear()
         plt.close()
