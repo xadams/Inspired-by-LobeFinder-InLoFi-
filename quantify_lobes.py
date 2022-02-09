@@ -328,7 +328,8 @@ def main(argv=None):
                                 neck_slope = 10e6
                             if 'prev_neck_slope' in locals():
                                 try:
-                                    lobe_neck_angle = np.arctan((neck_slope - prev_neck_slope) / (1 + neck_slope * prev_neck_slope))
+                                    lobe_neck_angle = np.arctan((neck_slope - prev_neck_slope)
+                                                                / (1 + neck_slope * prev_neck_slope))
                                 except ZeroDivisionError:
                                     lobe_neck_angle = 0
                                 combine_lobes_index.append(lobe_neck_angle * 180 / np.pi)

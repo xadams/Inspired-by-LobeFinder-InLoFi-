@@ -1,1 +1,2 @@
+test_data/MicroscopeROI.txt
 test_data/col0_cut_06_Roi1.txt
