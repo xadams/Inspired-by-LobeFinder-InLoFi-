@@ -161,7 +161,6 @@ DISABLE_REMOVE = logger.isEnabledFor(logging.DEBUG)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'test_data')
 FAIL_WELL_OUTPUT = os.path.join(os.path.dirname(__file__), 'lobe_quantities.csv')
-NO_NEW_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
 NO_NEW_LISTFILE = os.path.join(DATA_DIR, "single_listfile.txt")
 NEW_OUTFILE = os.path.join(DATA_DIR, "outfile.csv")
 NEW_IMAGE_FILE = os.path.join(DATA_DIR, "col0_cut_01_Roi1.png")
@@ -173,7 +172,7 @@ EMPTY_FOR_COPYING = os.path.join(DATA_DIR, "empty.csv")
 FULL_LISTFILE = os.path.join(DATA_DIR, "full_listfile.txt")
 FULL_OUTFILE = os.path.join(DATA_DIR, "full_outfile.csv")
 
-GOOD_SINGLE_OUTFILE = os.path.join(DATA_DIR, "single_outfile.csv")
+GOOD_SINGLE_OUTFILE = os.path.join(DATA_DIR, "good_single_outfile.csv")
 GOOD_APPEND_OUTFILE = os.path.join(DATA_DIR, "good_append_outfile.csv")
 GOOD_FULL_OUTFILE = os.path.join(DATA_DIR, "good_full_outfile.csv")
 
