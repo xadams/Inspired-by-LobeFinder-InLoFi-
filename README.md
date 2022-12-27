@@ -1,6 +1,6 @@
 This script quantifies individual lobes of dicot leaves, inspired by [LobeFinder](https://academic.oup.com/plphys/article/171/4/2331/6115282). The primary output is a csv file containing measurements for each lobe, with optional output visually describing how the lobes were determined from the input. One such visual is shown below:
 
-![alt text](https://github.com/xadams/LobePlotter/blob/master/LobePlotterDiagram.png)
+![alt text](https://github.com/xadams/LobePlotter/blob/master/InLoFiSchematic.png)
 
 ## Usage
 
